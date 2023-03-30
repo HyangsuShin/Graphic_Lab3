@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Objects">
+      <UniqueIdentifier>{7ad5c615-454f-4996-9b8a-80d529d4ffb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\External">
+      <UniqueIdentifier>{a8298167-8c2c-4c9e-9412-bb4a3266c15b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{2fa7b579-e01c-4b4e-aecd-3ef3e51624d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\Cubes">
+      <UniqueIdentifier>{fb869a26-c7d3-49c7-8a11-3f6fe6e5f84e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\Water">
+      <UniqueIdentifier>{f2baee7a-82e5-4b21-b877-08b379b64014}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Environment">
+      <UniqueIdentifier>{1657778d-43a4-4a30-894a-051b8e735069}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\Skybox">
+      <UniqueIdentifier>{7eaaa050-6e8a-4937-ba31-edb4e615d253}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\EventHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\GameObject2D.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\GameObject3D.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\ObjModel.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Pumpkin.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Wall.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\LightManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GamePlayManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Cube.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CameraManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Plane.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\ObjectData.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Environment\WorldManager.cpp">
+      <Filter>Source Files\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Objects\Skybox.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\EventHandler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utils.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\GameObject2D.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\GameObject3D.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\External\tinyObjLoader.h">
+      <Filter>Source Files\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\ObjModel.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Pumpkin.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Wall.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\LightManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GamePlayManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ShaderManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Cube.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CameraManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\ObjectData.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Environment\WorldManager.h">
+      <Filter>Source Files\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Objects\Skybox.h">
+      <Filter>Source Files\Objects</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Objects\Plane.h">
+      <Filter>Source Files\Objects</Filter>
+    </None>
+    <None Include="Source\Shaders\Cubes\Frag.frag">
+      <Filter>Source Files\Shaders\Cubes</Filter>
+    </None>
+    <None Include="Source\Shaders\Cubes\Vert.vert">
+      <Filter>Source Files\Shaders\Cubes</Filter>
+    </None>
+    <None Include="Source\Shaders\Water\Frag.frag">
+      <Filter>Source Files\Shaders\Water</Filter>
+    </None>
+    <None Include="Source\Shaders\Water\Vert.vert">
+      <Filter>Source Files\Shaders\Water</Filter>
+    </None>
+    <None Include="Source\Shaders\Cubes\Geom.geom">
+      <Filter>Source Files\Shaders\Cubes</Filter>
+    </None>
+    <None Include="Source\Shaders\Skybox\Frag.frag">
+      <Filter>Source Files\Shaders\Skybox</Filter>
+    </None>
+    <None Include="Source\Shaders\Skybox\Vert.vert">
+      <Filter>Source Files\Shaders\Skybox</Filter>
+    </None>
+    <None Include="Source\Shaders\Water\TessControl.tesc">
+      <Filter>Source Files\Shaders\Water</Filter>
+    </None>
+    <None Include="Source\Shaders\Water\TessEval.tese">
+      <Filter>Source Files\Shaders\Water</Filter>
+    </None>
+  </ItemGroup>
+</Project>

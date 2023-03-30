@@ -1,0 +1,301 @@
+#include "ShaderManager.h"
+#include <cstdio>
+#include <iostream>
+#include "Utils.h"
+#include "vmath.h"
+#include "CameraManager.h"
+#include "EventHandler.h"
+#include "Environment/WorldManager.h"
+
+using namespace std;
+
+ShaderManager* ShaderManager::instance = nullptr;
+
+#define LOG_COMPILE_SHADERS 1
+
+ShaderManager::ShaderManager()
+{
+}
+
+ShaderManager::~ShaderManager()
+{
+}
+
+void ShaderManager::Init()
+{
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	glewExperimental = GL_TRUE;
+}
+
+// function to call post Init
+void ShaderManager::Startup()
+{
+	for (int i = 0; i < NUM_SHADERS; i++)
+	{
+		programObj[i] = glCreateProgram();
+	}
+}
+
+void ShaderManager::LoadVertices(ShaderTypes ID, static const GLfloat CubeVB[], int numVerts)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, verticesHandle[ID]);
+	glBufferData(GL_ARRAY_BUFFER, numVerts, CubeVB, GL_STATIC_DRAW);
+}
+
+void ShaderManager::LoadUVs(ShaderTypes ID, static const GLfloat uvVB[], int numUVs)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, UVHandle[ID]);
+	glBufferData(GL_ARRAY_BUFFER, numUVs, uvVB, GL_STATIC_DRAW);
+}
+
+void ShaderManager::LoadNormals(ShaderTypes ID, static const GLfloat NormalsVB[], int numNormals)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, NormalsHandle[ID]);
+	glBufferData(GL_ARRAY_BUFFER, numNormals, NormalsVB, GL_STATIC_DRAW);
+}
+
+void ShaderManager::FindUniformHandles(ShaderTypes ID)
+{
+	TextureUniformHandle[ID] = glGetUniformLocation(programObj[ID], "texture0");// Get the initial matrices references from the program.
+
+	ModelViewUniformHandle[ID] = glGetUniformLocation(programObj[ID], "mv_matrix");
+
+	ProjectionUniformHandle[ID] = glGetUniformLocation(programObj[ID], "proj_matrix");
+
+	AmbientUniformHandle[ID] = glGetUniformLocation(programObj[ID], "ambientLight");
+
+	PositionsUniformHandle[ID] = glGetUniformLocation(programObj[ID], "position");
+
+}
+
+void ShaderManager::LoadShaderFromFile(ShaderTypes ID, const char * shaderfile, GLenum type)
+{
+	GLuint shaderObj = 0;
+	FILE * filePtr;
+	
+#ifdef LOG_COMPILE_SHADERS
+	string newStr = "Source\\Shaders\\glslangValidator.exe ";
+	newStr.append(shaderfile);
+	cout << newStr.c_str();
+	system(newStr.c_str());
+#endif
+
+	if (fopen_s(&filePtr, shaderfile, "rb"))
+	{
+		cout << "error opening shader file: " << shaderfile << endl;
+		return;
+	}
+
+	fseek(filePtr, 0, SEEK_END);
+	int size = ftell(filePtr);
+	fseek(filePtr, 0, SEEK_SET);
+
+	char *data = new char[size + 1];
+
+	if (!data)
+	{
+		cout << "No Data inside shader file: " << shaderfile << endl;
+		return;
+	}
+
+	fread(data, 1, size, filePtr);
+	data[size] = 0;
+	fclose(filePtr);
+
+	ProcessShaderFile(ID, shaderObj, data, type);
+
+	delete[] data;
+}
+
+void ShaderManager::ProcessShaderFile(ShaderTypes ID, GLuint shader, char *shaderData, GLenum type)
+{
+
+	shader = glCreateShader(type);
+
+	if (!shader)
+	{
+		cout << "error creating shader: " << shader << endl;
+		return;
+	}
+
+	glShaderSource(shader, 1, &shaderData, NULL);
+	glCompileShader(shader);
+	glAttachShader(programObj[ID], shader);
+	glDeleteShader(shader);
+}
+
+void ShaderManager::LoadShader(ShaderTypes ID, bool recompiled)
+{
+	// load in the shaders for the specific object type.
+	string vertShadername = "Source\\Shaders\\";
+	vertShadername.append(gShaderNames[ID]); // JD Create individual shader folders and different shaders for each object type.
+	vertShadername.append("\\Vert.vert");
+
+	string geomShadername = "Source\\Shaders\\";
+	geomShadername.append(gShaderNames[ID]); // JD Create individual shader folders and different shaders for each object type.
+	geomShadername.append("\\Geom.geom");
+
+	string fragShadername = "Source\\Shaders\\";
+	fragShadername.append(gShaderNames[ID]); // JD Create individual shader folders and different shaders for each object type.
+	fragShadername.append("\\Frag.frag");
+
+	LoadShaderFromFile(ID, vertShadername.c_str(), GL_VERTEX_SHADER);
+	LoadShaderFromFile(ID, geomShadername.c_str(), GL_GEOMETRY_SHADER);
+	LoadShaderFromFile(ID, fragShadername.c_str(), GL_FRAGMENT_SHADER);
+
+	glLinkProgram(programObj[ID]);
+
+	if (!recompiled)
+	{
+		glGenVertexArrays(NUM_SHADERS, &vao[ID]);
+		glBindVertexArray(vao[ID]);
+		glGenBuffers(NUM_SHADERS, &verticesHandle[ID]);
+		glGenBuffers(NUM_SHADERS, &UVHandle[ID]);
+		glGenBuffers(NUM_SHADERS, &NormalsHandle[ID]);
+	}
+	FindUniformHandles(ID);
+//JD	SkyboxTextUniformHandle = glGetUniformLocation(programObj[SKYBOX], "skybox");
+}
+
+void ShaderManager::Render(ShaderTypes shaderID, TextureTypes texID, BlockTypes blockType)
+{
+	glUseProgram(programObj[shaderID]);
+	glBindVertexArray(vao[shaderID]);
+	//pass in the vertices for our cube
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, verticesHandle[shaderID]);
+	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+
+	vmath::mat4 proj_matrix = CameraManager::GetInstance()->getModifiedProjectionMatrix();
+	glUniformMatrix4fv(ProjectionUniformHandle[shaderID], 1, GL_FALSE, proj_matrix);
+
+	if (shaderID == SKYBOX)
+	{
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, SkyBoxTexture);
+		// pass our data to openGL to store for the shaders use.
+		glUniform1i(SkyboxTextUniformHandle, SkyBoxTexture);
+
+		//glDrawArrays(GL_TRIANGLES, 0, 4 * 3);
+		return;
+	}
+
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, UVHandle[shaderID]);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, NormalsHandle[shaderID]);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	glActiveTexture(GL_TEXTURE1 + texID);
+	glBindTexture(GL_TEXTURE_2D, Textures[texID]);
+	// pass our data to openGL to store for the shaders use.
+	glUniform1i(TextureUniformHandle[shaderID], Textures[(int)texID]);
+
+	float LightVals[3] = { 0.2f, 0.2f, 0.2f };
+	glUniform3fv(AmbientUniformHandle[shaderID], 1, &LightVals[0]);
+
+	if (shaderID == WATER)
+	{
+
+		vmath::mat4 mv_matrix = vmath::translate(-5.0f, -3.0f, -6.0f);
+		mv_matrix *= vmath::scale(1.0f, 1.0f, 1.0f);
+		glUniformMatrix4fv(ModelViewUniformHandle[shaderID], 1, GL_FALSE, mv_matrix);
+
+		glDrawArraysInstanced(GL_TRIANGLES, 0, 4 * 3, WorldManager::WORLD_WIDTH * WorldManager::WORLD_DEPTH);
+	}
+	else
+	{
+		int NumInstances = WorldManager::GetInstance()->getNumBlocksByType(blockType);
+		for (int i = 0; i < NumInstances; i++)
+		{
+			if (blockType != NUM_BLOCK_TYPES)
+			{
+				Vec3 pos = WorldManager::GetInstance()->getCube(blockType, i)->GetPosition();
+				vmath::mat4 mv_matrix = vmath::translate(pos.x-5, pos.y-6, pos.z-35);
+
+				mv_matrix *= vmath::scale(1.0f, 1.0f, 1.0f);
+				glUniformMatrix4fv(ModelViewUniformHandle[shaderID], 1, GL_FALSE, mv_matrix);
+				glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+			}
+		}
+	}
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+}
+
+void ShaderManager::LoadTexture()
+{
+
+	// create a handle for the texture so openGL has an area allocated to manage all our binary image data.
+	for (int i = 0; i < NUM_TEXTURES; i++)
+	{
+		glGenTextures(1, &Textures[i]);
+
+		// now tell OpenGL this is the texture we are currently using for all subsequent texture calls.
+
+		glBindTexture(GL_TEXTURE_2D, Textures[i]);
+
+		unsigned int width, height;
+		unsigned char* imgData = Utils::loadBMP(gTextureStrings[i].c_str(), width, height);
+
+		// load our texture data up here
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, imgData);
+
+		// configure mipmapping levels
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	//now load the skybox cubemap:
+
+	/*glGenTextures(1, &SkyBoxTexture);
+
+	// now tell OpenGL this is the texture we are currently using for all subsequent texture calls.
+
+	glBindTexture(GL_TEXTURE_2D, SkyBoxTexture);
+
+	unsigned int width, height;
+	unsigned char* imgData = Utils::loadBMP("Data\\Art\\skybox.bmp", width, height);
+
+	// load our texture data up here
+	glTexImage2D(GL_TEXTURE_CUBE_MAP, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, imgData);
+
+	// configure mipmapping levels
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);*/
+}
+
+
+void ShaderManager::Update()
+{
+	if (EventHandler::events[ControlsEvents::R_PRESSED])
+	{
+		for (int i = 0; i < NUM_SHADERS; i++)
+		{
+			glDeleteProgram(programObj[i]);
+			programObj[i] = glCreateProgram();
+			LoadShader((ShaderTypes)i, true);
+		}
+	}
+}
+
+void ShaderManager::Shutdown()
+{
+	for (int i = 0; i < NUM_SHADERS; i++)
+	{
+		glDeleteProgram(programObj[i]);
+		glDeleteVertexArrays(1, &vao[i]);
+	}
+}
